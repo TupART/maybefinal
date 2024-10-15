@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Rellenar Plantilla</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Rellenar PlantillaSTEP4.xlsx</h1>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" required>
+            <h2>Selecciona los registros a rellenar:</h2>
+            <div id="checkboxes">
+                <!-- Checkbox se generarán aquí mediante JavaScript -->
+            </div>
+            <button type="submit">Generar Plantilla</button>
+        </form>
+    </div>
+    <script>
+        document.querySelector('input[type="file"]').addEventListener('change', function() {
+            const file = this.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(firstSheet);
+
+                const checkboxesDiv = document.getElementById('checkboxes');
+                checkboxesDiv.innerHTML = ''; // Limpiar checkboxes previos
+                json.forEach((row, index) => {
+                    const label = document.createElement('label');
+                    label.innerHTML = `<input type="checkbox" name="selected_rows" value="${index}"> ${row.Name} ${row.Surname}`;
+                    checkboxesDiv.appendChild(label);
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+</body>
+</html>
